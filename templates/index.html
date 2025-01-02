@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Summarizer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+        }
+        form {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            font-size: 1.1em;
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            resize: vertical;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1em;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+    <script>
+        // Function to handle form submission
+        async function submitForm(event) {
+            event.preventDefault();  // Prevent the form from submitting the traditional way
+
+            const inputText = document.getElementById("user_input").value; // Get input text from textarea
+
+            if (inputText.trim() === "") {
+                alert("Please enter some text!");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("user_input", inputText);  // Append the input text to the form data
+
+            try {
+                // Send the user input to Flask backend for summarization
+                const response = await fetch('/process', {
+                    method: 'POST',
+                    body: formData,  // Send the form data as the body
+                });
+
+                const data = await response.json();  // Parse the JSON response
+
+                if (data.summary) {
+                    // Update the summary output textarea with the result from Hugging Face API
+                    document.getElementById("summary_output").value = data.summary;
+                } else {
+                    document.getElementById("summary_output").value = "An error occurred. Please try again.";
+                }
+
+            } catch (error) {
+                console.error("Error:", error);
+                document.getElementById("summary_output").value = "An error occurred. Please try again.";
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Text Summarizer</h1>
+    <form onsubmit="submitForm(event)">
+        <label for="user_input">Enter Your Text:</label>
+        <textarea id="user_input" name="user_input" rows="6" placeholder="Paste your text here..."></textarea>
+        <br><br>
+        <button type="submit">Submit</button>
+        <br><br>
+        <label for="summary_output">Summarized Text:</label>
+        <textarea id="summary_output" name="summary_output" rows="6" readonly placeholder="Your summarized text will appear here..."></textarea>
+    </form>
+</body>
+</html>
+    
